@@ -3,7 +3,7 @@
 ### Author: Misty Garcia, Adam Krull, and Ryan McCall
 
 ## Description: 
-This project aims to predict the probability that a a Amex customer defaults on their account.
+This project aims to predict the probability that an American Express customer defaults on their account.
 
 ## Project Organization
 
@@ -54,3 +54,15 @@ Modified from [datasciencemvp](https://github.com/cliffclive/datasciencemvp/)
 | Target | Definition |
 | --- | --- |
 | Target 1 | Definition 1 |
+
+## Steps to Reproduce
+1. Join the [AMEX competition](https://www.kaggle.com/competitions/amex-default-prediction/overview) on the Kaggle website
+1. Go to your account page on Kaggle and request an API key
+1. Create a hidden directory called `.kaggle` in your root directory
+1. Store the `kaggle.json` that is in Downloads in `~/.kaggle`
+1. `pip install kaggle`
+1. Clone the repo
+1. You should now be able to run `python main.py` and have it run successfully.
+
+### Head's up
+The training data and test data are both large files (over 6gb for train and over 30gb for test) so make sure you have the available space for these and don't be surprised if the .
