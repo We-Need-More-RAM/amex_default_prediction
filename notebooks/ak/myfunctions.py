@@ -177,3 +177,12 @@ def valid_null_counter(df, scaler):
     return df_count
 
 
+def model_evaluator(model, data, y_true):
+    
+    y_hat = model.predict(data)
+    
+    y_true_final = pd.DataFrame(y_true)
+    
+    y_hat_final = pd.DataFrame(y_hat, columns=['prediction'])
+    
+    return amex_metric(y_true_final, y_hat_final)
