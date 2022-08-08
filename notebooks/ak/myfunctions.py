@@ -54,6 +54,28 @@ def age_calculator(df):
     return df
 
 
+def import_train():
+    
+    base_url = '../../data/prepared/'
+    
+    train = pd.read_csv(base_url + 'train_data.csv')
+    
+    train_labels = pd.read_csv(base_url + 'train_labels.csv')
+    
+    return train, train_labels
+
+
+def import_validate():
+    
+    base_url = '../../data/prepared/'
+    
+    valid = pd.read_csv(base_url + 'val_data.csv')
+    
+    valid_labels = pd.read_csv(base_url + 'val_labels.csv')
+    
+    return valid, valid_labels
+
+
 def initial_prep(df):
     
     df.drop(columns=['S_2'], inplace=True)
@@ -61,7 +83,7 @@ def initial_prep(df):
     return df
                              
 
-def null_counter(df):
+def train_null_counter(df):
     
     df_count = df.groupby('customer_ID').agg(lambda x: x.isnull().sum())
     
@@ -80,11 +102,78 @@ def handle_categories(df):
     
     dummy_df = pd.get_dummies(df[categorical_columns], dummy_na=True)
     
+    id_df = pd.DataFrame(df['customer_ID'])
+    
+    dummy_df = pd.concat([id_df, dummy_df], axis=1)
+    
     dummy_last = dummy_df.groupby('customer_ID').agg('last')
     
-    return dummy_last
+    return dummy_last, categorical_columns
 
 
-def cap_numerical_columns(df):
+def cap_numerical_columns(df, cat_cols):
     
-    numerical_columns = 
+    numerical_cols = list(df.drop(columns=cat_cols))
+    
+    numerical_cols.remove('customer_ID')
+    
+    for col in numerical_cols:
+        df[col].clip(lower=-3, upper=3, inplace=True)
+        
+    return df, numerical_cols
+
+
+def impute_numerical_nulls(df, num_cols, k=5):
+    
+    for col in num_cols:
+        df[col].fillna(k, inplace=True)
+        
+    return df    
+                       
+
+def aggregate_features(df, num_cols):
+    
+    new_df = pd.DataFrame({'customer_ID': df['customer_ID'].unique()})
+    
+    for col in num_cols:
+        mini = df.groupby('customer_ID')[col].min()
+        maxi = df.groupby('customer_ID')[col].max()
+        med = df.groupby('customer_ID')[col].median()
+        std = df.groupby('customer_ID')[col].std()
+        first = df.groupby('customer_ID')[col].first()
+        last = df.groupby('customer_ID')[col].last()
+        change = last - first
+    
+        stats = pd.DataFrame({f'{col}_min': mini, f'{col}_max': maxi,
+                              f'{col}_median': med, f'{col}_std': std,
+                              f'{col}_last': last, f'{col}_change': change})
+    
+        stats.reset_index(drop=True, inplace=True)
+    
+        new_df = pd.concat([new_df, stats], axis=1)
+        
+    new_df.set_index('customer_ID', inplace=True)    
+    
+    return new_df
+
+
+def concat_dataframes(agg_df, dummy_df, null_df):
+    
+    df = pd.concat([agg_df, dummy_df], axis=1)
+    
+    df = pd.concat([df, null_df], axis=1)
+    
+    return df
+
+
+def valid_null_counter(df, scaler):
+    
+    df_count = df.groupby('customer_ID').agg(lambda x: x.isnull().sum())
+    
+    df_count.columns = [x + '_nulls' for x in df_count.columns]
+    
+    df_count[df_count.columns] = scaler.transform(df_count[df_count.columns])
+    
+    return df_count
+
+
