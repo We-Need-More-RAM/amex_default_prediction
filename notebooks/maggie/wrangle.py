@@ -18,7 +18,8 @@ def clean_amex(X_df):
     X_df['S_2'] = pd.to_datetime(X_df.S_2)
     
     # For columns D_63, D_64 and B_31, we will want to create dummy variables. 
-    X_df = pd.get_dummies(X_df, columns=['D_63', 'D_64', 'B_31'], drop_first=True)
+    cat_columns = ['B_30', 'B_31', 'B_38', 'D_114', 'D_116', 'D_117', 'D_120', 'D_126', 'D_63', 'D_64', 'D_66', 'D_68']
+    X_df = pd.get_dummies(X_df, columns=cat_columns, drop_first=True)
 
     return X_df
 
@@ -45,10 +46,13 @@ def get_features(X_df):
     # drop those columns where > 90% of rows are missing values
     missing_counts_df = pd.DataFrame({'missing_count': metrics_df.isnull().sum(), 'missing_pct': metrics_df.isnull().sum()/len(metrics_df)})
     cols_to_drop = missing_counts_df[missing_counts_df.missing_pct > .90].index
-    metrics_df = metrics_df.drop(columns=cols_to_drop)
+    features_df = metrics_df.drop(columns=cols_to_drop)
+    
+    return features_df
 
-    entropy_series = metrics_df.apply(ent)
-    features_df = metrics_df[entropy_series[entropy_series > 1].index]
+def compute_entropy(features_df, ent):
+    entropy_series = features_df.apply(ent)
+    features_df = features_df[entropy_series[entropy_series > 1].index]
     return features_df
 
 def split_amex(X_df, y_df, train_size=.5, test_size=.5):
@@ -185,7 +189,9 @@ def get_pctb(X_df, metrics_df):
     return metrics_df
 
 def get_range(X_df, metrics_df):
+    df_customer_indexed = X_df.set_index('customer_ID')
     range_series = pd.Series()
+
     for x in df_customer_indexed.columns:
         range_val = metrics_df[x + '_max'] - metrics_df[x + '_min']
         range_series = pd.concat([range_series, range_val], axis=1)
@@ -197,6 +203,7 @@ def get_range(X_df, metrics_df):
     return metrics_df
 
 def get_cv(X_df, metrics_df):
+    df_customer_indexed = X_df.set_index('customer_ID')
     cv_series = pd.Series()
     for x in df_customer_indexed.columns:
         cv = metrics_df[x + '_std']/metrics_df[x + '_ema']
