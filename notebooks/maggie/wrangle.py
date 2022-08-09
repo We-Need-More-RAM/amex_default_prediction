@@ -114,13 +114,13 @@ def get_zeros(X_df):
 #     cv_df.columns = [x + '_cv' for x in cv_df.columns]
 #     return cv_df
 
-def get_two_period_difference(X_df):
+def get_one_period_difference(X_df):
     '''
     This function computes the 2-period in values for each feature. 
     it returns a dataframe with the customer id set to the index. 
     the function is used in compute_delta_values() function
     '''
-    delta_df = X_df.groupby('customer_ID').diff(periods=2)
+    delta_df = X_df.groupby('customer_ID').diff(periods=1)
     delta_df.index = X_df.customer_ID
     return delta_df
 
@@ -136,7 +136,7 @@ def get_delta_values(X_df):
     Finally, all of these dataframes are concatenated into a single dataframe, delta_df. 
     '''
     # first compute the 2 period delta and create a dataframe with those values
-    delta_df = get_two_period_difference(X_df)
+    delta_df = get_one_period_difference(X_df)
     delta_df.columns = [x + '_diff' for x in delta_df.columns]
     
     # Use the delta df to take the last value as the current delta
@@ -148,7 +148,7 @@ def get_delta_values(X_df):
     
     # use the delta df to compute the rolling average of the delta values
     delta_mean = delta_df.groupby('customer_ID').transform(lambda x: x.rolling(window=6, 
-                                                                       min_periods=3, 
+                                                                       min_periods=1, 
                                                                        closed='left').mean())
     delta_mean.columns = [x + '_mean' for x in delta_df.columns]
     
@@ -184,7 +184,7 @@ def get_pctb(X_df, metrics_df):
     
     pctb_df = pd.DataFrame(pctb_series)
     pctb_df = pctb_df.iloc[:,1:]
-    pctb_df.columns = [x + '_%b' for x in df_customer_indexed.columns]
+    pctb_df.columns = [x + '_pctb' for x in df_customer_indexed.columns]
     metrics_df = pd.concat([pctb_df, metrics_df], axis=1)
     return metrics_df
 
