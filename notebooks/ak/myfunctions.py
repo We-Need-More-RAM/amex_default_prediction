@@ -100,7 +100,7 @@ def handle_categories(df):
     
     categorical_columns = ['B_30', 'B_38', 'D_114', 'D_116', 'D_117', 'D_120', 'D_126', 'D_63', 'D_64', 'D_66', 'D_68']
     
-    dummy_df = pd.get_dummies(df[categorical_columns], dummy_na=True)
+    dummy_df = pd.get_dummies(df[categorical_columns].astype('category'), dummy_na=True)
     
     id_df = pd.DataFrame(df['customer_ID'])
     
@@ -152,7 +152,9 @@ def aggregate_features(df, num_cols):
     
         new_df = pd.concat([new_df, stats], axis=1)
         
-    new_df.set_index('customer_ID', inplace=True)    
+    new_df.set_index('customer_ID', inplace=True)
+    
+    new_df.fillna(0, inplace=True)
     
     return new_df
 
