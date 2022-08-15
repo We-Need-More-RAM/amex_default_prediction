@@ -123,7 +123,7 @@ def cap_numerical_columns(df, cat_cols):
     return df, numerical_cols
 
 
-def impute_numerical_nulls(df, num_cols, k=5):
+def impute_numerical_nulls(df, num_cols, k=7):
     
     for col in num_cols:
         df[col].fillna(k, inplace=True)
