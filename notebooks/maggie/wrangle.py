@@ -3,8 +3,8 @@ import scipy.stats
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-def acquire_amex(sample_size=199990):
-    X_df = pd.read_csv('../../data/raw/train_data.csv', nrows = sample_size)
+def acquire_amex():
+    X_df = pd.read_csv('../../data/raw/train_data.csv')
     y_df = pd.read_csv('../../data/raw/train_labels.csv')
     return X_df, y_df
 
@@ -96,6 +96,24 @@ def get_null_count(X_df):
     missing_vals.columns = [x + '_nulls' for x in missing_vals.columns]
     return missing_vals
 
+def get_negative_count(X_df):
+    '''
+    this function will calculate the number of values that are negative (<0) for each feature. 
+    it reaturns a dataframe with the columns: <column_name_orig>_neg
+    '''
+    neg_df = X_df.groupby('customer_ID').agg(lambda x: (x < 0.0).sum())
+    neg_df.columns = [x + '_neg' for x in neg_df.columns]
+    return neg_df
+
+def get_negative_pct(X_df):
+    '''
+    this function will calculate the percent of values that are negative (<0) for each feature. 
+    it reaturns a dataframe with the columns: <column_name_orig>_neg_pct
+    '''
+    neg_pct_df = X_df.groupby('customer_ID').agg(lambda x: (x < 0.0).mean())
+    neg_pct_df.columns = [x + '_neg_pct' for x in neg_pct_df.columns]
+    return neg_pct_df
+
 def get_zeros(X_df):
     '''
     this function will calculate the number of zeros values for each feature. 
@@ -104,6 +122,15 @@ def get_zeros(X_df):
     zeros_df = X_df.groupby('customer_ID').agg(lambda x: (x == 0.0).sum())
     zeros_df.columns = [x + '_zeros' for x in zeros_df.columns]
     return zeros_df
+
+def get_zeros_pct(X_df):
+    '''
+    this function will calculate the percent of zeros values for each feature. 
+    it reaturns a dataframe with the columns: <column_name_orig>_zeros_pct 
+    '''
+    zeros_pct_df = X_df.groupby('customer_ID').agg(lambda x: (x == 0.0).mean())
+    zeros_pct_df.columns = [x + '_zeros_pct' for x in zeros_pct_df.columns]
+    return zeros_pct_df
 
 # def get_cv(X_df):
 #     '''
