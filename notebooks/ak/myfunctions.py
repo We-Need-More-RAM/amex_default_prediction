@@ -5,8 +5,7 @@ from sklearn.preprocessing import StandardScaler
 def amex_metric(y_true: pd.DataFrame, y_pred: pd.DataFrame) -> float:
 
     def top_four_percent_captured(y_true: pd.DataFrame, y_pred: pd.DataFrame) -> float:
-        df = (pd.concat([y_true, y_pred], axis='columns')
-              .sort_values('prediction', ascending=False))
+        df = (pd.concat([y_true, y_pred], axis='columns').sort_values('prediction', ascending=False))
         df['weight'] = df['target'].apply(lambda x: 20 if x==0 else 1)
         four_pct_cutoff = int(0.04 * df['weight'].sum())
         df['weight_cumsum'] = df['weight'].cumsum()
@@ -14,8 +13,7 @@ def amex_metric(y_true: pd.DataFrame, y_pred: pd.DataFrame) -> float:
         return (df_cutoff['target'] == 1).sum() / (df['target'] == 1).sum()
         
     def weighted_gini(y_true: pd.DataFrame, y_pred: pd.DataFrame) -> float:
-        df = (pd.concat([y_true, y_pred], axis='columns')
-              .sort_values('prediction', ascending=False))
+        df = (pd.concat([y_true, y_pred], axis='columns').sort_values('prediction', ascending=False))
         df['weight'] = df['target'].apply(lambda x: 20 if x==0 else 1)
         df['random'] = (df['weight'] / df['weight'].sum()).cumsum()
         total_pos = (df['target'] * df['weight']).sum()
